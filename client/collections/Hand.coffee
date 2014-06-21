@@ -18,3 +18,25 @@ class window.Hand extends Backbone.Collection
       score + if card.get 'revealed' then card.get 'value' else 0
     , 0
     if hasAce then [score, score + 10] else [score]
+  stand: ->
+    @trigger('stand', @)
+
+  play: ->
+    if not @isDealer then throw 'play called on player'
+    # Reveal Cards
+    @reveal()
+    while (@calcScore() < 17)
+      @hit()
+
+    @trigger('ended', @)
+
+
+  calcScore: ->
+    scores = @scores()
+    if scores.length == 1 then return scores[0]
+    if scores[1] > 21 then scores[0] else scores[1]
+
+  reveal: ->
+    @each((card) ->
+      if not card.get('revealed') then card.flip()
+    )
